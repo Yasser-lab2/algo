@@ -15,7 +15,7 @@ int fibonacci_rec(int n)
     return fibonacci_rec(n - 1) + fibonacci_rec(n - 2);
 }
 
-int fibonacci_iter(int n)
+unsigned long long fibonacci_iter(int n)
 {
 
     if (n <= 1)
@@ -25,13 +25,12 @@ int fibonacci_iter(int n)
 
     int count = 2;
 
-    int prev = 1;
-    int pprev = 0;
+    unsigned long long prev = 1;
+    unsigned long long pprev = 0;
 
     int fibo = 0;
     while (count <= n)
     {
-
         fibo = pprev + prev;
 
         pprev = prev;

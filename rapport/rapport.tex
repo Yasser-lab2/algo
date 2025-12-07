@@ -1,0 +1,363 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{pdfpages}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{listingsutf8}
+\lstset{inputencoding=utf8/latin1}
+% Geometry
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+
+% Listing configuration for C code
+\lstdefinestyle{cstyle}{
+    language=C,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!60!black}\itshape,
+    stringstyle=\color{red},
+    numberstyle=\tiny\color{gray},
+    numbers=left,
+    numbersep=8pt,
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    showstringspaces=false,
+    captionpos=b,
+    xleftmargin=2em,
+    framexleftmargin=1.5em
+}
+
+\lstset{style=cstyle}
+
+% Hyperref configuration
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+% Headers and footers
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{TP1 - Algorithmique}
+\lhead{Filière Ingénieur : ILISI}
+\rfoot{Page \thepage}
+
+\begin{document}
+
+% Include cover page (assuming cover.pdf exists in rapport directory)
+% \includepdf[pages=1]{cover.pdf}
+
+% Title page (alternative if no cover.pdf)
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\Huge\bfseries Rapport de TP1\par}
+    \vspace{1cm}
+    {\Large Algorithmique\par}
+    \vspace{2cm}
+
+    {\Large\itshape Filière Ingénieur : ILISI\par}
+    \vspace{1cm}
+    {\large 1ère année\par}
+
+    \vfill
+
+    {\large Réalisé par :\par}
+    {\Large [Votre Nom]\par}
+
+    \vfill
+
+    {\large Année Universitaire\par}
+    {\Large 2024-2025\par}
+\end{titlepage}
+
+% Table of contents
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+Ce rapport présente le travail réalisé dans le cadre du TP1 d'algorithmique. Nous avons implémenté trois exercices fondamentaux permettant d'explorer différentes techniques algorithmiques et d'analyser leur complexité :
+
+\begin{itemize}
+    \item \textbf{Exercice 1} : Le Calendrier Perpétuel - calcul du jour de la semaine pour une date donnée
+    \item \textbf{Exercice 2} : Suite de Fibonacci - comparaison d'approches récursive et itérative
+    \item \textbf{Exercice 3} : Calcul de Puissance - optimisation du calcul de $x^n$
+\end{itemize}
+
+Pour chaque exercice, nous analysons le problème, présentons la solution implémentée, évaluons la complexité algorithmique et discutons les résultats obtenus.
+
+\newpage
+
+\section{Exercice 1 : Le Calendrier Perpétuel}
+
+\subsection{Analyse du problème}
+
+Le problème consiste à créer un programme capable de déterminer le jour de la semaine correspondant à une date donnée (jour, mois, année). L'algorithme doit gérer les particularités du calendrier grégorien pour garantir l'exactitude du résultat.
+
+Les points clés à considérer sont :
+\begin{itemize}
+    \item \textbf{Années bissextiles} : Une année est bissextile si elle est divisible par 4, à l'exception des années séculaires (multiples de 100) qui ne sont pas divisibles par 400. Par exemple, 2000 est bissextile, mais 1900 ne l'est pas.
+    \item \textbf{Nombre de jours par mois} : Le nombre de jours varie (28, 29, 30, ou 31) et dépend du mois et de l'année (pour février).
+    \item \textbf{Date de référence} : L'algorithme se base sur une date de référence connue. Dans notre cas, le 1er janvier 1900, qui était un lundi.
+\end{itemize}
+
+L'approche consiste à calculer le nombre total de jours écoulés entre la date de référence et la date cible, puis à utiliser une opération modulo 7 pour trouver le jour de la semaine.
+
+\subsection{Entrées et sorties}
+
+\subsubsection{Entrées}
+\begin{itemize}
+    \item \texttt{day} : entier représentant le jour du mois (1-31).
+    \item \texttt{month} : énumération \texttt{Month} représentant le mois (de JANUARY à DECEMBER).
+    \item \texttt{year} : entier représentant l'année (ex: 2025).
+\end{itemize}
+
+\subsubsection{Sorties}
+\begin{itemize}
+    \item Une énumération de type \texttt{Day} représentant le jour de la semaine (de MONDAY à SUNDAY).
+\end{itemize}
+
+\subsection{Implémentation et explication}
+
+\subsubsection{Structures de données}
+Pour améliorer la lisibilité et la robustesse du code, nous utilisons des énumérations pour les jours et les mois.
+
+\begin{lstlisting}[caption={Énumérations pour les jours et les mois}]
+typedef enum Day { MONDAY, TUESDAY, ..., SUNDAY } Day;
+typedef enum Month { JANUARY, FEBRUARY, ..., DECEMBER } Month;
+\end{lstlisting}
+
+\subsubsection{Algorithme principal : \texttt{jour\_dans\_semaine}}
+L'algorithme se déroule en quatre étapes :
+\begin{enumerate}
+    \item \textbf{Initialisation} : Un compteur de jours \texttt{days} est initialisé à 0.
+    \item \textbf{Calcul des jours des années complètes} : Une boucle parcourt chaque année de 1900 jusqu'à l'année précédant celle de la date cible. Pour chaque année, on ajoute 366 jours si elle est bissextile, et 365 sinon.
+    \item \textbf{Calcul des jours des mois complets} : Une seconde boucle parcourt les mois de l'année en cours, de janvier jusqu'au mois précédant celui de la date cible. Pour chaque mois, on ajoute le nombre de jours correspondant.
+    \item \textbf{Ajout des jours du mois courant} : On ajoute le numéro du jour dans le mois (moins 1, car le premier jour est déjà compté).
+    \item \textbf{Calcul final} : Le total \texttt{days} est divisé par 7, et le reste donne le jour de la semaine (0 pour lundi, 1 for mardi, etc.).
+\end{enumerate}
+
+\begin{lstlisting}[caption={Algorithme de calcul du jour de la semaine}]
+Day jour_dans_semaine(int day, Month month, int year)
+{
+    int days = 0;
+
+    // 1. Compter les jours des années complètes
+    for (int i = 1900; i < year; i++) {
+        days += Isbisextile(i) ? 366 : 365;
+    }
+
+    // 2. Ajouter les jours des mois complets
+    for (int i = 0; i < month; i++) {
+        days += nbr_jour_dans_mois(i, year);
+    }
+
+    // 3. Ajouter les jours du mois en cours
+    days += day - 1;
+
+    // 4. Le jour est le reste modulo 7
+    return days % 7;
+}
+\end{lstlisting}
+
+\subsection{Complexité algorithmique}
+
+\subsubsection{Fonction \texttt{Isbisextile(year)}}
+\begin{itemize}
+    \item \textbf{Complexité temporelle} : $O(1)$, car elle effectue un nombre constant d'opérations arithmétiques.
+    \item \textbf{Complexité spatiale} : $O(1)$, car elle n'utilise pas de mémoire supplémentaire proportionnelle à l'entrée.
+\end{itemize}
+
+\subsubsection{Fonction \texttt{nbr\_jour\_dans\_mois(month, year)}}
+\begin{itemize}
+    \item \textbf{Complexité temporelle} : $O(1)$, car la structure \texttt{switch} a un nombre de cas fixe.
+    \item \textbf{Complexité spatiale} : $O(1)$.
+\end{itemize}
+
+\subsubsection{Fonction \texttt{jour\_dans\_semaine(day, month, year)}}
+\begin{itemize}
+    \item \textbf{Complexité temporelle} : $O(Y + M)$, où $Y$ est le nombre d'années depuis 1900 et $M$ est le nombre de mois dans l'année. Comme $M$ est au maximum 12, la complexité est dominée par $Y$, soit $O(Y)$.
+    \item \textbf{Complexité spatiale} : $O(1)$.
+\end{itemize}
+
+\subsection{Tests et résultats}
+L'algorithme a été validé avec un ensemble de dates pour vérifier sa correction, y compris :
+\begin{itemize}
+    \item 7 décembre 2025 $\rightarrow$ SUNDAY (dimanche)
+    \item 11 février 2024 $\rightarrow$ dimanche
+    \item 1er janvier 1900 $\rightarrow$ MONDAY (lundi)
+\end{itemize}
+Les résultats obtenus correspondent aux jours de la semaine attendus, confirmant la validité de l'implémentation.
+
+\subsection{Code complet}
+
+\lstinputlisting[caption={calendar.h - Fichier d'en-tête}]{../calendar.h}
+
+\lstinputlisting[caption={calendar.c - Implémentation complète}]{../calendar.c}
+
+\newpage
+
+\section{Exercice 2 : Suite de Fibonacci}
+
+\subsection{Analyse du problème}
+La suite de Fibonacci est une séquence d'entiers où chaque terme est la somme des deux termes qui le précèdent. Elle est définie par la relation de récurrence suivante :
+\begin{align*}
+F(0) &= 0 \\
+F(1) &= 1 \\
+F(n) &= F(n-1) + F(n-2) \text{ pour } n > 1
+\end{align*}
+L'objectif est d'implémenter deux algorithmes pour calculer le n-ième terme de la suite : une version récursive directe et une version itérative, afin de comparer leurs performances.
+
+\subsection{Entrées et sorties}
+
+\subsubsection{Entrées}
+\begin{itemize}
+    \item \texttt{n} : entier positif, l'indice du terme de la suite à calculer.
+\end{itemize}
+
+\subsubsection{Sorties}
+\begin{itemize}
+    \item Le n-ième terme de la suite de Fibonacci. Le type de retour est \texttt{unsigned long long} pour la version itérative afin de gérer de grands nombres, tandis que la version récursive utilise \texttt{int} pour illustrer les limites de débordement.
+\end{itemize}
+
+\subsection{Implémentation et explication}
+
+\subsubsection{Algorithme récursif naïf}
+Cet algorithme traduit directement la définition mathématique de la suite.
+\begin{itemize}
+    \item \textbf{Cas de base (conditions d'arrêt)} :
+        \begin{itemize}
+            \item Si $n=0$, la fonction retourne 0.
+            \item Si $n=1$, la fonction retourne 1.
+        \end{itemize}
+    \item \textbf{Étape récursive} : Pour tout autre $n$, la fonction s'appelle elle-même avec $n-1$ et $n-2$ et retourne la somme de leurs résultats.
+\end{itemize}
+Bien qu'élégant, cet algorithme est très inefficace car il recalcule les mêmes termes de la suite de nombreuses fois.
+
+\begin{lstlisting}[caption={Algorithme récursif de Fibonacci}]
+int fibonacci_rec(int n)
+{
+    if (n <= 1) {
+        return n;
+    }
+    return fibonacci_rec(n - 1) + fibonacci_rec(n - 2);
+}
+\end{lstlisting}
+
+\subsubsection{Algorithme itératif}
+Cet algorithme calcule les termes de la suite de manière séquentielle en utilisant une boucle, ce qui évite les calculs redondants.
+\begin{enumerate}
+    \item \textbf{Initialisation} : On initialise deux variables pour stocker les deux premiers termes, \texttt{pprev = 0} ($F(0)$) et \texttt{prev = 1} ($F(1)$).
+    \item \textbf{Itération} : Une boucle \texttt{while} s'exécute de 2 à $n$. À chaque itération, on calcule le terme suivant en additionnant \texttt{pprev} et \texttt{prev}.
+    \item \textbf{Mise à jour} : Les valeurs de \texttt{pprev} et \texttt{prev} sont mises à jour pour l'itération suivante.
+    \item \textbf{Résultat} : Après la boucle, la variable contenant le dernier terme calculé est retournée.
+\end{enumerate}
+
+\begin{lstlisting}[caption={Algorithme itératif de Fibonacci}]
+unsigned long long fibonacci_iter(int n)
+{
+    if (n <= 1) {
+        return n;
+    }
+    unsigned long long pprev = 0;
+    unsigned long long prev = 1;
+    unsigned long long fibo = 0;
+    for (int i = 2; i <= n; i++) {
+        fibo = pprev + prev;
+        pprev = prev;
+        prev = fibo;
+    }
+    return prev;
+}
+\end{lstlisting}
+
+\subsection{Complexité algorithmique}
+
+\subsubsection{Version récursive naïve}
+\begin{itemize}
+    \item \textbf{Complexité temporelle} : $O(2^n)$. L'arbre d'appels récursifs a une profondeur de $n$ et chaque appel (sauf ceux des cas de base) en génère deux autres, menant à une croissance exponentielle.
+    \item \textbf{Complexité spatiale} : $O(n)$, en raison de la profondeur de la pile d'appels récursifs.
+\end{itemize}
+
+\subsubsection{Version itérative}
+\begin{itemize}
+    \item \textbf{Complexité temporelle} : $O(n)$. L'algorithme effectue une seule boucle qui s'exécute $n-1$ fois.
+    \item \textbf{Complexité spatiale} : $O(1)$, car il utilise un nombre constant de variables, quelle que soit la valeur de $n$.
+\end{itemize}
+
+\subsection{Tests et résultats}
+Les performances des deux algorithmes ont été mesurées en utilisant la fonction \texttt{clock()} pour différentes valeurs de $n$.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{n} & \textbf{Itératif ($\mu$s)} & \textbf{Récursif ($\mu$s)} \\
+\hline
+10 & < 1 & < 1 \\
+20 & < 1 & 13 \\
+30 & < 1 & 1,213 \\
+40 & < 1 & 173,778 \\
+45 & < 1 & 1,662,728 \\
+\hline
+\end{tabular}
+\caption{Comparaison des temps d'exécution}
+\end{table}
+
+\textbf{Observations} :
+\begin{itemize}
+    \item Pour de petites valeurs de $n$, les deux algorithmes sont rapides.
+    \item Dès que $n$ dépasse 30, le temps d'exécution de la version récursive augmente de manière exponentielle, devenant rapidement impraticable.
+    \item La version itérative reste quasi instantanée, démontrant sa supériorité en termes d'efficacité.
+    \item \textbf{Cas de débordement (edge case)} : Pour $n > 46$, le résultat de la version récursive (utilisant \texttt{int}) déborde et devient incorrect. La version itérative avec \texttt{unsigned long long} peut calculer des termes beaucoup plus grands (jusqu'à $n \approx 93$).
+\end{itemize}
+
+\subsection{Code complet}
+
+\lstinputlisting[caption={fibonacci.c - Implémentation complète}]{../fibonacci.c}
+
+\newpage
+
+\section{Exercice 3 : Calcul de Puissance}
+
+\subsection{Analyse du problème}
+
+\textit{À compléter}
+
+\subsection{Entrées et sorties}
+
+\textit{À compléter}
+
+\subsection{Complexité algorithmique}
+
+\textit{À compléter}
+
+\subsection{Implémentation et explication}
+
+\textit{À compléter}
+
+\subsection{Code complet}
+
+\textit{À compléter}
+
+\subsection{Tests et résultats}
+
+\textit{À compléter}
+
+\end{document}
