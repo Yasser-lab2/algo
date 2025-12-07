@@ -2,13 +2,15 @@
 #include "stdbool.h"
 enum Day
 {
+
     MONDAY,
     TUESDAY,
     WEDNESDAY,
     THURSDAY,
     FRIDAY,
     SATURDAY,
-    SUNDAY
+    SUNDAY,
+
 };
 typedef enum Day Day;
 enum Month
@@ -65,28 +67,28 @@ Day jour_dans_semaine(int day, Month month, int year)
 {
 
     // int year_offset = year - 1900
-    int days=0;
+    int days = 0;
     for (int i = 1900; i < year; i++)
     {
-        days += Isbisextile(year) ? 366 : 365;
+        days += Isbisextile(i) ? 366 : 365;
     }
-    
+
     for (int i = 0; i < month; i++)
     {
         days += nbr_jour_dans_mois(i, year);
     }
-    days += day;
+    days += day-1;
 
-    return days % 6;
+    return days % 7;
 }
 
 int main()
 {
     int year = 2025;
     Month month = DECEMBER;
-    int day =2;
+    int day = 31;
 
-    printf("Jour dans semaine : %d\n", jour_dans_semaine(day,month,year));
+    printf("Jour dans semaine : %d\n", jour_dans_semaine(day, month, year));
 
     // printf("nbr de jours dans %d , %d est : %d\n", FEBRUARY, year, nbr_jour_dans_mois(FEBRUARY, year));
     // printf("bisextile %s \n", (Isbisextile(year) ? "OUI" : "NON"));
